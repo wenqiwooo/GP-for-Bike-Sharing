@@ -3,8 +3,8 @@ from scraper import Scraper
 
 
 HOSTNAME = '127.0.0.1'
-USERNAME = 'noobnoob'
-PASSWORD = 'noobnoob'
+USERNAME = 'root'
+PASSWORD = 'root'
 DATABASE = 'bike-gp'
 
 # Bounding box = (min_lat, min_long, max_lat, max_long)
