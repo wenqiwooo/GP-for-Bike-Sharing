@@ -1,1 +1,2 @@
-0,30 * * * * cd ~/Bike-GP && source venv/bin/activate && python3 main.py > cron.log && deactivate
+SHELL=/bin/bash
+0,30 * * * * cd /home/wenqi/Bike-GP && source venv/bin/activate && python3 main.py && deactivate
