@@ -18,7 +18,7 @@ Go to project root.
 
 ### Cron
 
-
+`crontab -f crontab.txt`
 
 ### To create db dump
 
