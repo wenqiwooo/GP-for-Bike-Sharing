@@ -8,6 +8,8 @@ Go to project root.
 
 `docker exec -i db mysql -uroot -proot < init_db.sql`
 
+`touch cron.log`
+
 ### Setting up virtualenv
 
 `virtualenv -p python3 venv`
@@ -18,7 +20,7 @@ Go to project root.
 
 ### Cron
 
-`crontab -f crontab.txt`
+`crontab crontab.txt`
 
 ### To create db dump
 
