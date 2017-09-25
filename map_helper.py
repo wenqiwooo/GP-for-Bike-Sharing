@@ -23,3 +23,16 @@ class MapHelper:
         curr_long = curr_long + (float(unit_dist) / EARTH_RADIUS) * (180 / pi) / cos(curr_lat * pi / 180)
       curr_lat = curr_lat + (float(unit_dist) / EARTH_RADIUS) * (180 / pi)
       curr_long = min_long
+  
+  @staticmethod
+  def bounding_box(center, size):
+    """
+    center:   lat, long
+    size:     size of box
+    """
+    center_lat, center_lng = center
+    lng_delta = (float(size) / (2 * EARTH_RADIUS)) * (180 / pi) / cos(center_lat * pi / 180)
+    lat_delta = (float(size) / (2 * EARTH_RADIUS)) * (180 / pi)
+    min_lat, max_lat = map(lambda x: x * lat_delta + center_lat, [-1, 1])
+    min_lng, max_lng = map(lambda x: x * lng_delta + center_lng, [-1, 1])
+    return min_lat, min_lng, max_lat, max_lng
