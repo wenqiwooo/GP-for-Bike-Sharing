@@ -1,8 +1,8 @@
 ## Scraper
 
-`cd ~ && mkdir cs4246-db`
+`cd Bike-GP && mkdir db`
 
-`docker run --name db -v ~/cs4246-db:/var/lib/mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest`
+``docker run --name db -v `pwd`/db:/var/lib/mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest``
 
 Go to project root.
 
