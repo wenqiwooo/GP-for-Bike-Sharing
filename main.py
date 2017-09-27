@@ -14,7 +14,7 @@ TAMPINES = 'Tampines'
 # BOONLAY = 'Boon Lay'
 # JURONG_BOX
 # JURONG = 'Jurong East'
-# SENGKANG_BOX
+# SENGKANG_BOX = (1.378823, 103.856249, 1.402076, 103.909292)
 # SENGKANG = 'Seng Kang'
 
 
