@@ -21,6 +21,6 @@ TAMPINES = 'Tampines'
 if __name__ == '__main__':
   scraper = Scraper(HOSTNAME, USERNAME, PASSWORD, DATABASE)
   scraper.connect()
-  tampines_coords = MapHelper.coordinates(box=TAMPINES_BOX, unit_dist=0.5)
+  tampines_coords = MapHelper.coordinates(box=TAMPINES_BOX, unit_dist=0.8)
   scraper.scrape_obike(coordinates=tampines_coords, region=TAMPINES)
   scraper.disconnect()
