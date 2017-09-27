@@ -1,5 +1,6 @@
 from map_helper import MapHelper
 
+import csv
 import numpy as np
 import pymysql
 
@@ -28,6 +29,13 @@ class DataLoader:
     region:     'Tampines', 'Boon Lay', 'Jurong East', 'Seng Kang'
     box:        (min lat, min long, max lat, max long)
     unit_dist:  unit distance in km
+
+    # Sample usage
+
+    loader = DataLoader('127.0.0.1', 'root', 'root', 'bike-gp')
+    loader.connect()
+    data = loader.load_region_data('Tampines', (1.344467, 103.930952, 1.360377, 103.957675))
+    loader.disconnect()
     """
     cur = self.conn.cursor()
     output_data = []
@@ -53,15 +61,28 @@ class DataLoader:
       for row in cur:
         output_data.append((*coordinate, row[0].timestamp(), row[1]))
     cur.close()
-    
     if output_data:
       data = np.array(output_data)
       return data[:,:3], data[:,3]
 
+  def to_csv(self, filename):
+    # Read all results from database
+    cur = self.conn.cursor()
+    res = []
+    cur.execute("SELECT * FROM obike;")
+    res = [row for row in cur]
+    cur.close()
+
+    # Write to CSV
+    with open(filename, 'w') as f:
+      writer = csv.writer(f)
+      writer.writerow([description[0] for description in cur.description]) # header
+      for row in res:
+        writer.writerow(row)
+
+
 if __name__ == '__main__':
-  # Sample usage
   loader = DataLoader('127.0.0.1', 'root', 'root', 'bike-gp')
   loader.connect()
-  data = loader.load_region_data('Tampines', (1.344467, 103.930952, 1.360377, 103.957675))
+  loader.to_csv('dump.csv')
   loader.disconnect()
-  print(data)
