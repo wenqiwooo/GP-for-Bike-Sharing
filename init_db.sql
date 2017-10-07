@@ -34,8 +34,8 @@ DROP TABLE IF EXISTS `obike`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `obike` (
   `obike_id` varchar(16) DEFAULT NULL,
-  `longitude` float DEFAULT NULL,
-  `latitude` float DEFAULT NULL,
+  `longitude` double DEFAULT NULL,
+  `latitude` double DEFAULT NULL,
   `imei` varchar(16) NOT NULL,
   `country_id` int(11) DEFAULT NULL,
   `helmet` tinyint(6) DEFAULT NULL,

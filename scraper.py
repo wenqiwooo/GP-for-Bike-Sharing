@@ -30,12 +30,12 @@ class Scraper:
       data = r.json()['data']['list']
       self._insert_obike_data(data, region, dt)
       print('Finished 1 run! Sleeping...')
-      time.sleep(30)
+      time.sleep(10)
 
   def _insert_obike_data(self, data, region, dt):
     cur = self.conn.cursor()
     for d in data:
-      cur.execute("""
+      query = """
         REPLACE INTO obike (obike_id, longitude, latitude, imei, country_id, helmet, created_at, region) 
         VALUES ('{}', {}, {}, '{}', {}, {}, '{}', '{}')
         """.format(
@@ -47,5 +47,7 @@ class Scraper:
           d['helmet'],
           dt,
           region
-        ))
+        )
+      # print(query)
+      cur.execute(query)
     self.conn.commit()
