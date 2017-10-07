@@ -14,8 +14,8 @@ TAMPINES = 'Tampines'
 # BOONLAY = 'Boon Lay'
 # JURONG_BOX
 # JURONG = 'Jurong East'
-# SENGKANG_BOX = (1.378823, 103.856249, 1.402076, 103.909292)
-# SENGKANG = 'Seng Kang'
+SENGKANG_BOX = (1.378823, 103.856249, 1.402076, 103.909292)
+SENGKANG = 'Seng Kang'
 
 
 if __name__ == '__main__':
@@ -23,4 +23,6 @@ if __name__ == '__main__':
   scraper.connect()
   tampines_coords = MapHelper.coordinates(box=TAMPINES_BOX, unit_dist=0.8)
   scraper.scrape_obike(coordinates=tampines_coords, region=TAMPINES)
+  sengkang_coords = MapHelper.coordinates(box=SENGKANG_BOX, unit_dist=0.8)
+  scraper.scrape_obike(coordinates=sengkang_coords, region=SENGKANG)
   scraper.disconnect()

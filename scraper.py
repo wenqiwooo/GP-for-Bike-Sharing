@@ -30,7 +30,7 @@ class Scraper:
       data = r.json()['data']['list']
       self._insert_obike_data(data, region, dt)
       print('Finished 1 run! Sleeping...')
-      time.sleep(10)
+      time.sleep(5)
 
   def _insert_obike_data(self, data, region, dt):
     cur = self.conn.cursor()
