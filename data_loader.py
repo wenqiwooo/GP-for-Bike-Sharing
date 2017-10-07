@@ -43,12 +43,13 @@ class DataLoader:
       min_lat, min_lng, max_lat, max_lng = MapHelper.bounding_box(coordinate, unit_dist)
       cur.execute(
           """
-          SELECT created_at FROM obike
+          SELECT created_at, COUNT(*) FROM obike
           WHERE region = '{region}'
           AND latitude >= {min_lat}
           AND latitude < {max_lat}
           AND longitude >= {min_lng}
           AND longitude > {max_lng}
+          GROUP BY created_at
           """.format(
               region=region,
               min_lat=min_lat,
@@ -58,11 +59,11 @@ class DataLoader:
           )
       )
       for row in cur:
-        output_data.append((*coordinate, row[0].timestamp()))
+        output_data.append((*coordinate, row[0].timestamp(), row[1]))
     cur.close()
     if output_data:
       data = np.array(output_data)
-      return data[:,:3]
+      return data[:,:3], data[:,3]
 
   def to_csv(self, filename):
     # Read all results from database
@@ -84,7 +85,8 @@ if __name__ == '__main__':
   loader = DataLoader('localhost', 'root', 'root', 'bike-gp')
   loader.connect()
   TAMPINES_BOX = (1.344467, 103.930952, 1.360377, 103.957675)
-  X = loader.load_region_data('Tampines', TAMPINES_BOX)
+  X, y = loader.load_region_data('Tampines', TAMPINES_BOX, unit_dist=0.05)
   loader.disconnect()
 
   np.save('tampines-npX', X)
+  np.save('tampines-npY', y)
