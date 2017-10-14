@@ -148,7 +148,7 @@ class DataLoader:
 
 if __name__ == '__main__':
   # preprocess
-  DataLoader.dump()
+  # DataLoader.dump()
 
   """
   30 min: 1800
