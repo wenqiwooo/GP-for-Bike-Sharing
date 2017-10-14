@@ -43,22 +43,46 @@ class DataLoader:
     for coordinate in MapHelper.coordinates(box, unit_dist):
       min_lat, min_lng, max_lat, max_lng = MapHelper.bounding_box(coordinate, unit_dist)
       cur.execute(
-          """
-          SELECT created_at, COUNT(*) FROM obike
-          WHERE region = '{region}'
-          AND latitude >= {min_lat}
-          AND latitude < {max_lat}
-          AND longitude >= {min_lng}
-          AND longitude < {max_lng}
-          GROUP BY created_at
-          """.format(
-              region=region,
-              min_lat=min_lat,
-              min_lng=min_lng,
-              max_lat=max_lat,
-              max_lng=max_lng
-          )
+        """
+        SELECT A.created_at, COALESCE(B.bike_count, 0) as bc
+        FROM (
+          SELECT DISTINCT created_at FROM obike WHERE region = '{region}'
+        ) AS A
+        LEFT JOIN (
+          SELECT created_at, COUNT(*) as bike_count FROM obike
+                  WHERE region = '{region}'
+                  AND latitude >= {min_lat}
+                  AND latitude < {max_lat}
+                  AND longitude >= {min_lng}
+                  AND longitude < {max_lng}
+                  GROUP BY created_at
+        ) AS B
+        ON A.created_at = B.created_at;
+        """.format(
+          region=region,
+          min_lat=min_lat,
+          min_lng=min_lng,
+          max_lat=max_lat,
+          max_lng=max_lng
+        )
       )
+      # cur.execute(
+      #     """
+      #     SELECT created_at, COUNT(*) FROM obike
+      #     WHERE region = '{region}'
+      #     AND latitude >= {min_lat}
+      #     AND latitude < {max_lat}
+      #     AND longitude >= {min_lng}
+      #     AND longitude < {max_lng}
+      #     GROUP BY created_at
+      #     """.format(
+      #         region=region,
+      #         min_lat=min_lat,
+      #         min_lng=min_lng,
+      #         max_lat=max_lat,
+      #         max_lng=max_lng
+      #     )
+      # )
       latitude, longitude, lat_idx, long_idx = coordinate
       for row in cur:
         ts = DataLoader.round_epoch(row[0].timestamp(), 30)
@@ -124,7 +148,7 @@ class DataLoader:
 
 if __name__ == '__main__':
   # preprocess
-  # DataLoader.dump()
+  DataLoader.dump()
 
   """
   30 min: 1800
@@ -133,5 +157,5 @@ if __name__ == '__main__':
   3 hr:   10800
   4 hr:   14400
   """
-  d = DataLoader.load_data('./sk-data.npy', 3600, 3)
+  d = DataLoader.load_data('./tp-data.npy', 7200, 36)
   print(d.shape)
