@@ -24,7 +24,7 @@ class Scraper:
 
   def scrape_obike(self, coordinates, region):
     dt = time.strftime('%Y-%m-%d %H:%M:%S')
-    for latitude, longitude in coordinates:
+    for latitude, longitude, _, _ in coordinates:
       url = 'https://mobile.o.bike/api/v1/bike/list?latitude={}&longitude={}'.format(latitude, longitude)
       r = requests.get(url)
       data = r.json()['data']['list']

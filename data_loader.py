@@ -59,13 +59,14 @@ class DataLoader:
               max_lng=max_lng
           )
       )
+      latitude, longitude, lat_idx, long_idx = coordinate
       for row in cur:
         ts = DataLoader.round_epoch(row[0].timestamp(), 30)
-        output_data.append((*coordinate, ts, row[1]))
+        output_data.append((latitude, longitude, ts, row[1], lat_idx, long_idx))
     cur.close()
     if output_data:
       data = np.array(output_data)
-      return data[:,:3], data[:,3]
+      return data
 
   def to_csv(self, filename):
     # Read all results from database
@@ -90,37 +91,36 @@ class DataLoader:
     if r < 1800/2:
       return timestamp - r
     else:
-      return timestamp + r
+      return timestamp - r + 1800
 
   @staticmethod
-  def load_data(input, output, period, intervals=None):
+  def load_data(input, period, intervals=None):
     """
     Returns X, Y
     """
-    x = np.load(input)
-    y = np.load(output)
-    data = np.concatenate([x, y.reshape(-1, 1)], axis=1)
+    data = np.load(input)
     data = data[data[:,2] % period == 0]
     if intervals is None:
       intervals = data.shape[0]
-    X = data[:intervals, :3]
-    Y = data[:intervals, 3]
-    np.save('data_x', X)
-    np.save('data_y', Y)
+    np.save('filtered_data', data[:intervals])
+    return data[:intervals]
+
+  @staticmethod
+  def dump():
+    loader = DataLoader('localhost', 'root', 'root', 'bike-gp')
+    loader.connect()
+    print('Doing Tampines')
+    tp_data = loader.load_region_data(TAMPINES, TAMPINES_BOX, unit_dist=UNIT_DIST)
+    print('Doing Sengkang')
+    sk_data = loader.load_region_data(SENGKANG, SENGKANG_BOX, unit_dist=UNIT_DIST)
+    loader.disconnect()
+    np.save('tp-data', tp_data)
+    np.save('sk-data', sk_data)
+
 
 if __name__ == '__main__':
-  # loader = DataLoader('localhost', 'root', 'root', 'bike-gp')
-  # loader.connect()
-  # print('Doing Tampines')
-  # tp_x, tp_y = loader.load_region_data(TAMPINES, TAMPINES_BOX, unit_dist=UNIT_DIST)
-  # print('Doing Sengkang')
-  # sk_x, sk_y = loader.load_region_data(SENGKANG, SENGKANG_BOX, unit_dist=UNIT_DIST)
-  # loader.disconnect()
-
-  # np.save('tp-input', tp_x)
-  # np.save('tp-output', tp_y)
-  # np.save('sk-input', sk_x)
-  # np.save('sk-output', sk_y)
+  # preprocess
+  # DataLoader.dump()
 
   """
   30 min: 1800
@@ -129,4 +129,5 @@ if __name__ == '__main__':
   3 hr:   10800
   4 hr:   14400
   """
-  DataLoader.load_data('./sk-input.npy', './sk-output.npy', 14400, 50)
+  d = DataLoader.load_data('./sk-data.npy', 14400)
+  print(d)
