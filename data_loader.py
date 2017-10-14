@@ -1,8 +1,9 @@
 from map_helper import MapHelper
-
+from constants import TAMPINES, TAMPINES_BOX, SENGKANG, SENGKANG_BOX, UNIT_DIST
 import csv
 import numpy as np
 import pymysql
+from tqdm import tqdm
 
 class DataLoader:
   def __init__(self, db_hostname, db_username, db_password, db_database):
@@ -59,7 +60,8 @@ class DataLoader:
           )
       )
       for row in cur:
-        output_data.append((*coordinate, row[0].timestamp(), row[1]))
+        ts = DataLoader.round_epoch(row[0].timestamp(), 30)
+        output_data.append((*coordinate, ts, row[1]))
     cur.close()
     if output_data:
       data = np.array(output_data)
@@ -80,13 +82,45 @@ class DataLoader:
       for row in res:
         writer.writerow(row)
 
+  @staticmethod
+  def round_epoch(timestamp, m):
+    """Round off timestamp to m minutes"""
+    timestamp = int(timestamp)
+    r = timestamp % 1800
+    if r < 1800/2:
+      return timestamp - r
+    else:
+      return timestamp + r
+
+  @staticmethod
+  def load_data(filename, period, intervals=None):
+    x = np.load(filename)
+    x = x[x[:,2] % period == 0]
+    if intervals is None:
+      return x
+    return x[:intervals]
+
 
 if __name__ == '__main__':
-  loader = DataLoader('localhost', 'root', 'root', 'bike-gp')
-  loader.connect()
-  TAMPINES_BOX = (1.344467, 103.930952, 1.360377, 103.957675)
-  X, y = loader.load_region_data('Tampines', TAMPINES_BOX, unit_dist=0.05)
-  loader.disconnect()
+  # loader = DataLoader('localhost', 'root', 'root', 'bike-gp')
+  # loader.connect()
+  # print('Doing Tampines')
+  # tp_x, tp_y = loader.load_region_data(TAMPINES, TAMPINES_BOX, unit_dist=UNIT_DIST)
+  # print('Doing Sengkang')
+  # sk_x, sk_y = loader.load_region_data(SENGKANG, SENGKANG_BOX, unit_dist=UNIT_DIST)
+  # loader.disconnect()
 
-  np.save('tampines-npX', X)
-  np.save('tampines-npY', y)
+  # np.save('tp-input', tp_x)
+  # np.save('tp-output', tp_y)
+  # np.save('sk-input', sk_x)
+  # np.save('sk-output', sk_y)
+
+  """
+  30 min: 1800
+  1 hr:   3600
+  2 hr:   7200
+  3 hr:   10800
+  4 hr:   14400
+  """
+  d = DataLoader.load_data('./sk-input.npy', 14400)
+  print(d.shape)
