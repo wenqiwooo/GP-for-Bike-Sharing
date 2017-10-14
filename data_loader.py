@@ -99,11 +99,15 @@ class DataLoader:
     Returns X, Y
     """
     data = np.load(input)
+    ts_start = np.amin(data[:,2])
+    if intervals is not None:
+      ts_end = ts_start + intervals*period
+    else:
+      ts_end = np.amax(data[:,2]) + period
     data = data[data[:,2] % period == 0]
-    if intervals is None:
-      intervals = data.shape[0]
-    np.save('filtered_data', data[:intervals])
-    return data[:intervals]
+    data = data[data[:,2] < ts_end]
+    np.save('filtered_data', data)
+    return data
 
   @staticmethod
   def dump():
@@ -120,7 +124,7 @@ class DataLoader:
 
 if __name__ == '__main__':
   # preprocess
-  DataLoader.dump()
+  # DataLoader.dump()
 
   """
   30 min: 1800
@@ -129,5 +133,5 @@ if __name__ == '__main__':
   3 hr:   10800
   4 hr:   14400
   """
-  d = DataLoader.load_data('./sk-data.npy', 3600)
-  print(d)
+  d = DataLoader.load_data('./sk-data.npy', 3600, 3)
+  print(d.shape)
