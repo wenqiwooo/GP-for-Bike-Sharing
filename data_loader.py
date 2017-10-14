@@ -25,7 +25,7 @@ class DataLoader:
     self.conn.close()
     print('Disconnected from db')
 
-  def load_region_data(self, region, box, unit_dist=0.1):
+  def load_region_data(self, region, box, unit_dist):
     """
     region:     'Tampines', 'Boon Lay', 'Jurong East', 'Seng Kang'
     box:        (min lat, min long, max lat, max long)
@@ -134,21 +134,25 @@ class DataLoader:
     return data
 
   @staticmethod
-  def dump():
+  def dump(unit_dist):
     loader = DataLoader('localhost', 'root', 'root', 'bike-gp')
     loader.connect()
     print('Doing Tampines')
-    tp_data = loader.load_region_data(TAMPINES, TAMPINES_BOX, unit_dist=UNIT_DIST)
+    tp_data = loader.load_region_data(TAMPINES, TAMPINES_BOX, unit_dist)
     print('Doing Sengkang')
-    sk_data = loader.load_region_data(SENGKANG, SENGKANG_BOX, unit_dist=UNIT_DIST)
+    sk_data = loader.load_region_data(SENGKANG, SENGKANG_BOX, unit_dist)
     loader.disconnect()
-    np.save('tp-data', tp_data)
-    np.save('sk-data', sk_data)
+    suffix = int(unit_dist*1000)
+    np.save('./data/tp-data-{}'.format(suffix), tp_data)
+    np.save('./data/sk-data-{}'.format(suffix), sk_data)
 
 
 if __name__ == '__main__':
   # preprocess
-  # DataLoader.dump()
+  # DataLoader.dump(0.1)
+  # DataLoader.dump(0.2)
+  # DataLoader.dump(0.4)
+  # DataLoader.dump(1.0)
 
   """
   30 min: 1800
@@ -157,5 +161,5 @@ if __name__ == '__main__':
   3 hr:   10800
   4 hr:   14400
   """
-  d = DataLoader.load_data('./tp-data.npy', 7200, 36)
+  d = DataLoader.load_data('./tp-data-50.npy', 7200, 36)
   print(d.shape)
