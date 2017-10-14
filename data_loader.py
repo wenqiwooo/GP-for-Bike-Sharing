@@ -93,13 +93,20 @@ class DataLoader:
       return timestamp + r
 
   @staticmethod
-  def load_data(filename, period, intervals=None):
-    x = np.load(filename)
-    x = x[x[:,2] % period == 0]
+  def load_data(input, output, period, intervals=None):
+    """
+    Returns X, Y
+    """
+    x = np.load(input)
+    y = np.load(output)
+    data = np.concatenate([x, y.reshape(-1, 1)], axis=1)
+    data = data[data[:,2] % period == 0]
     if intervals is None:
-      return x
-    return x[:intervals]
-
+      intervals = data.shape[0]
+    X = data[:intervals, :3]
+    Y = data[:intervals, 3]
+    np.save('data_x', X)
+    np.save('data_y', Y)
 
 if __name__ == '__main__':
   # loader = DataLoader('localhost', 'root', 'root', 'bike-gp')
@@ -122,5 +129,4 @@ if __name__ == '__main__':
   3 hr:   10800
   4 hr:   14400
   """
-  d = DataLoader.load_data('./sk-input.npy', 14400)
-  print(d.shape)
+  DataLoader.load_data('./sk-input.npy', './sk-output.npy', 14400, 50)
