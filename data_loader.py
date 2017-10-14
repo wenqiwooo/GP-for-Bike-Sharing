@@ -49,7 +49,7 @@ class DataLoader:
           AND latitude >= {min_lat}
           AND latitude < {max_lat}
           AND longitude >= {min_lng}
-          AND longitude > {max_lng}
+          AND longitude < {max_lng}
           GROUP BY created_at
           """.format(
               region=region,
@@ -120,7 +120,7 @@ class DataLoader:
 
 if __name__ == '__main__':
   # preprocess
-  # DataLoader.dump()
+  DataLoader.dump()
 
   """
   30 min: 1800
@@ -129,5 +129,5 @@ if __name__ == '__main__':
   3 hr:   10800
   4 hr:   14400
   """
-  d = DataLoader.load_data('./sk-data.npy', 14400)
+  d = DataLoader.load_data('./sk-data.npy', 3600)
   print(d)
