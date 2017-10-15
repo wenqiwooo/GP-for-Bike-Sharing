@@ -5,6 +5,7 @@ chardet==3.0.4
 cycler==0.10.0
 decorator==4.1.2
 entrypoints==0.2.3
+GPy==1.8.4
 html5lib==0.999999999
 idna==2.6
 ipykernel==4.6.1
@@ -26,10 +27,13 @@ nbformat==4.4.0
 notebook==5.1.0
 numpy==1.13.1
 pandas==0.20.3
+pandoc==1.0.0b2
 pandocfilters==1.4.2
+paramz==0.8.5
 parso==0.1.0
 pexpect==4.2.1
 pickleshare==0.7.4
+ply==3.10
 prompt-toolkit==1.0.15
 ptyprocess==0.5.2
 Pygments==2.2.0
@@ -49,6 +53,7 @@ sklearn==0.0
 terminado==0.6
 testpath==0.3.1
 tornado==4.5.2
+tqdm==4.19.2
 traitlets==4.3.2
 urllib3==1.22
 wcwidth==0.1.7

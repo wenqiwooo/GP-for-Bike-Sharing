@@ -25,7 +25,7 @@ class DataLoader:
     self.conn.close()
     print('Disconnected from db')
 
-  def load_region_data(self, region, box, unit_dist=0.1):
+  def load_region_data(self, region, box, unit_dist):
     """
     region:     'Tampines', 'Boon Lay', 'Jurong East', 'Seng Kang'
     box:        (min lat, min long, max lat, max long)
@@ -43,22 +43,46 @@ class DataLoader:
     for coordinate in MapHelper.coordinates(box, unit_dist):
       min_lat, min_lng, max_lat, max_lng = MapHelper.bounding_box(coordinate, unit_dist)
       cur.execute(
-          """
-          SELECT created_at, COUNT(*) FROM obike
-          WHERE region = '{region}'
-          AND latitude >= {min_lat}
-          AND latitude < {max_lat}
-          AND longitude >= {min_lng}
-          AND longitude < {max_lng}
-          GROUP BY created_at
-          """.format(
-              region=region,
-              min_lat=min_lat,
-              min_lng=min_lng,
-              max_lat=max_lat,
-              max_lng=max_lng
-          )
+        """
+        SELECT A.created_at, COALESCE(B.bike_count, 0) as bc
+        FROM (
+          SELECT DISTINCT created_at FROM obike WHERE region = '{region}'
+        ) AS A
+        LEFT JOIN (
+          SELECT created_at, COUNT(*) as bike_count FROM obike
+                  WHERE region = '{region}'
+                  AND latitude >= {min_lat}
+                  AND latitude < {max_lat}
+                  AND longitude >= {min_lng}
+                  AND longitude < {max_lng}
+                  GROUP BY created_at
+        ) AS B
+        ON A.created_at = B.created_at;
+        """.format(
+          region=region,
+          min_lat=min_lat,
+          min_lng=min_lng,
+          max_lat=max_lat,
+          max_lng=max_lng
+        )
       )
+      # cur.execute(
+      #     """
+      #     SELECT created_at, COUNT(*) FROM obike
+      #     WHERE region = '{region}'
+      #     AND latitude >= {min_lat}
+      #     AND latitude < {max_lat}
+      #     AND longitude >= {min_lng}
+      #     AND longitude < {max_lng}
+      #     GROUP BY created_at
+      #     """.format(
+      #         region=region,
+      #         min_lat=min_lat,
+      #         min_lng=min_lng,
+      #         max_lat=max_lat,
+      #         max_lng=max_lng
+      #     )
+      # )
       latitude, longitude, lat_idx, long_idx = coordinate
       for row in cur:
         ts = DataLoader.round_epoch(row[0].timestamp(), 30)
@@ -99,28 +123,36 @@ class DataLoader:
     Returns X, Y
     """
     data = np.load(input)
+    ts_start = np.amin(data[:,2])
+    if intervals is not None:
+      ts_end = ts_start + intervals*period
+    else:
+      ts_end = np.amax(data[:,2]) + period
     data = data[data[:,2] % period == 0]
-    if intervals is None:
-      intervals = data.shape[0]
-    np.save('filtered_data', data[:intervals])
-    return data[:intervals]
+    data = data[data[:,2] < ts_end]
+    np.save('filtered_data', data)
+    return data
 
   @staticmethod
-  def dump():
+  def dump(unit_dist):
     loader = DataLoader('localhost', 'root', 'root', 'bike-gp')
     loader.connect()
     print('Doing Tampines')
-    tp_data = loader.load_region_data(TAMPINES, TAMPINES_BOX, unit_dist=UNIT_DIST)
+    tp_data = loader.load_region_data(TAMPINES, TAMPINES_BOX, unit_dist)
     print('Doing Sengkang')
-    sk_data = loader.load_region_data(SENGKANG, SENGKANG_BOX, unit_dist=UNIT_DIST)
+    sk_data = loader.load_region_data(SENGKANG, SENGKANG_BOX, unit_dist)
     loader.disconnect()
-    np.save('tp-data', tp_data)
-    np.save('sk-data', sk_data)
+    suffix = int(unit_dist*1000)
+    np.save('./data/tp-data-{}'.format(suffix), tp_data)
+    np.save('./data/sk-data-{}'.format(suffix), sk_data)
 
 
 if __name__ == '__main__':
   # preprocess
-  DataLoader.dump()
+  # DataLoader.dump(0.1)
+  # DataLoader.dump(0.2)
+  # DataLoader.dump(0.4)
+  # DataLoader.dump(1.0)
 
   """
   30 min: 1800
@@ -129,5 +161,5 @@ if __name__ == '__main__':
   3 hr:   10800
   4 hr:   14400
   """
-  d = DataLoader.load_data('./sk-data.npy', 3600)
-  print(d)
+  d = DataLoader.load_data('./tp-data-50.npy', 7200, 36)
+  print(d.shape)
