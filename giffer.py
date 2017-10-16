@@ -8,10 +8,16 @@ import matplotlib.pyplot as plt
 def setup_arguments():
   parser = ArgumentParser(description='Create GIFs from data')
   parser.add_argument(
-    '--input_file',
+    '--input',
     default=None,
     required=True,
     help='(Required) The file to visualize',
+  )
+  parser.add_argument(
+    '--map_image',
+    default=None,
+    required=True,
+    help='(Required) The image of the map to be rendered underneath the data visualization.',
   )
   parser.add_argument(
     '--location_name',
@@ -40,7 +46,7 @@ def setup_arguments():
     help='The column of the bicycle counts. (Default 3)',
   )
   parser.add_argument(
-    '--output_file',
+    '--output',
     default='output.gif',
     help='The output GIF file. (Default output.gif)',
   )
@@ -54,7 +60,7 @@ def _pad_int_string(i, desired_len):
     return '0' * (desired_len - len(string)) + string
 
 
-def visualize_gif(data, out_file, ts_col, lat_col, lng_col, cnt_col, loc_name):
+def visualize_gif(data, out_file, image, ts_col, lat_col, lng_col, cnt_col, loc_name):
   """
   Requires imagemagick (and possibly yasm and ffmpeg). Visualizes data into a GIF.
   """
@@ -68,11 +74,9 @@ def visualize_gif(data, out_file, ts_col, lat_col, lng_col, cnt_col, loc_name):
   vmax = np.amax(data[:, cnt_col])
   z = np.zeros((max_lat_idx + 1, max_lng_idx + 1))
 
-  fig.gca().invert_yaxis()
-  # cbar = fig.colorbar(ax, ticks=[0, vmax / 2, vmax])
-  # cbar.ax.set_yticklabels(['0', '%s' % (vmax / 2), '%s' % vmax])
-
   im = plt.imshow(z, cmap=cm.coolwarm, interpolation='lanczos', vmin=vmin, vmax=vmax, animated=True)
+  plt.imshow(plt.imread(image), extent=[0, max_lng_idx, 0, max_lat_idx], alpha=0.3)
+
   cbar = fig.colorbar(im, ticks=[0, vmax / 2, vmax])
   cbar.ax.set_yticklabels(['0', '%s' % (vmax / 2), '%s' % vmax])
 
@@ -95,12 +99,13 @@ def visualize_gif(data, out_file, ts_col, lat_col, lng_col, cnt_col, loc_name):
 
 if __name__ == '__main__':
   args = setup_arguments()
-  data = np.load(args.input_file)
-  out_file = args.output_file
+  data = np.load(args.input)
+  out_file = args.output
+  image = args.map_image
   ts_col = args.ts_col
   lat_col = args.lat_idx_col
   lng_col = args.long_idx_col
   cnt_col = args.count_col
   loc_name = args.location_name
 
-  visualize_gif(data, out_file, ts_col, lat_col, lng_col, cnt_col, loc_name)
+  visualize_gif(data, out_file, image, ts_col, lat_col, lng_col, cnt_col, loc_name)
