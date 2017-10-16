@@ -131,12 +131,15 @@ class DataLoader:
     np.save('./data/sk-data-{}'.format(suffix), sk_data)
 
   @staticmethod
-  def load_data(input, period, intervals=None, prefix=None, suffix=None):
+  def load_data(input, period, offset=None, intervals=None, prefix=None, suffix=None):
     """
     Returns X, Y
     """
     data = np.load(input)
     ts_start = np.amin(data[:,2])
+    if offset:
+        ts_start += offset * period / 2
+
     if intervals is not None:
       ts_end = ts_start + intervals*period
     else:
@@ -167,6 +170,8 @@ if __name__ == '__main__':
   3 hr:   10800
   4 hr:   14400
   """
+
+  # Training Data
   # d = DataLoader.load_data('./data/tp-data-100.npy', 7200, suffix=100, intervals=36)
   # print(d.shape)
   d = DataLoader.load_data('./data/tp-data-200.npy', 3600, prefix='tp', suffix=200, intervals=72)
@@ -178,4 +183,18 @@ if __name__ == '__main__':
   d = DataLoader.load_data('./data/sk-data-200.npy', 7200, prefix='sk', suffix=200, intervals=24)
   print(d.shape)
   d = DataLoader.load_data('./data/sk-data-400.npy', 3600, prefix='sk', suffix=400)
+  print(d.shape)
+
+  # Test data
+  # d = DataLoader.load_data('./data/tp-test-data-100.npy', 7200, suffix=100, intervals=36)
+  # print(d.shape)
+  d = DataLoader.load_data('./data/tp-data-200.npy', 3600, offset=1, prefix='test-tp', suffix=200, intervals=72)
+  print(d.shape)
+  d = DataLoader.load_data('./data/tp-data-400.npy', 1800, offset=1, prefix='test-tp', suffix=400)
+  print(d.shape)
+  # d = DataLoader.load_data('./data/sk-test-data-100.npy', 7200, suffix=100, intervals=36)
+  # print(d.shape)
+  d = DataLoader.load_data('./data/sk-data-200.npy', 7200, offset=1, prefix='test-sk', suffix=200, intervals=24)
+  print(d.shape)
+  d = DataLoader.load_data('./data/sk-data-400.npy', 3600, offset=1, prefix='test-sk', suffix=400)
   print(d.shape)
