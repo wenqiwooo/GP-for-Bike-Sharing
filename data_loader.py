@@ -118,22 +118,6 @@ class DataLoader:
       return timestamp - r + 1800
 
   @staticmethod
-  def load_data(input, period, intervals=None):
-    """
-    Returns X, Y
-    """
-    data = np.load(input)
-    ts_start = np.amin(data[:,2])
-    if intervals is not None:
-      ts_end = ts_start + intervals*period
-    else:
-      ts_end = np.amax(data[:,2]) + period
-    data = data[data[:,2] % period == 0]
-    data = data[data[:,2] < ts_end]
-    np.save('filtered_data', data)
-    return data
-
-  @staticmethod
   def dump(unit_dist):
     loader = DataLoader('localhost', 'root', 'root', 'bike-gp')
     loader.connect()
@@ -145,6 +129,28 @@ class DataLoader:
     suffix = int(unit_dist*1000)
     np.save('./data/tp-data-{}'.format(suffix), tp_data)
     np.save('./data/sk-data-{}'.format(suffix), sk_data)
+
+  @staticmethod
+  def load_data(input, period, intervals=None, prefix=None, suffix=None):
+    """
+    Returns X, Y
+    """
+    data = np.load(input)
+    ts_start = np.amin(data[:,2])
+    if intervals is not None:
+      ts_end = ts_start + intervals*period
+    else:
+      ts_end = np.amax(data[:,2]) + period
+    data = data[data[:,2] % period == 0]
+    data = data[data[:,2] < ts_end]
+    output = 'filtered_data'
+    if suffix is not None:
+      output += '-{}'.format(suffix)
+    if prefix is not None:
+      output = '{}-'.format(prefix) + output
+    output = './data/' + output
+    np.save(output, data)
+    return data
 
 
 if __name__ == '__main__':
@@ -161,5 +167,15 @@ if __name__ == '__main__':
   3 hr:   10800
   4 hr:   14400
   """
-  d = DataLoader.load_data('./tp-data-50.npy', 7200, 36)
+  # d = DataLoader.load_data('./data/tp-data-100.npy', 7200, suffix=100, intervals=36)
+  # print(d.shape)
+  d = DataLoader.load_data('./data/tp-data-200.npy', 3600, prefix='tp', suffix=200, intervals=72)
+  print(d.shape)
+  d = DataLoader.load_data('./data/tp-data-400.npy', 1800, prefix='tp', suffix=400)
+  print(d.shape)
+  # d = DataLoader.load_data('./data/sk-data-100.npy', 7200, suffix=100, intervals=36)
+  # print(d.shape)
+  d = DataLoader.load_data('./data/sk-data-200.npy', 7200, prefix='sk', suffix=200, intervals=24)
+  print(d.shape)
+  d = DataLoader.load_data('./data/sk-data-400.npy', 3600, prefix='sk', suffix=400)
   print(d.shape)
